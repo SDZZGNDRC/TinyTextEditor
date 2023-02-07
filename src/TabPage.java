@@ -2,6 +2,7 @@ import java.awt.event.*;
 import javax.swing.event.*;
 import javax.swing.*;
 import java.awt.*;
+import java.io.*;
 
 public class TabPage extends JScrollPane implements ActionListener, DocumentListener {
     public JEditorPane textPane;
@@ -11,9 +12,11 @@ public class TabPage extends JScrollPane implements ActionListener, DocumentList
     public JLabel lblTitle; // Title
     private JButton btnClose; // Close button
     public boolean text_changed_flag;
+    public File file;
     public TabPage(JTabbedPane _tabPane, String _title, Font _font, String _FontName_LineNumber) {
         super();
         text_changed_flag = false;
+        file = null;
         tabPane = _tabPane;
         textPane = new JEditorPane(); // 编辑区域
         this.setViewportView(textPane);
@@ -82,5 +85,12 @@ public class TabPage extends JScrollPane implements ActionListener, DocumentList
     }
     public void Select(){
         tabPane.setSelectedIndex(tabPane.indexOfTab(lblTitle.getText()));
+    }
+    public void setTitle(String title){
+        int index = tabPane.indexOfTab(lblTitle.getText());
+        if(index>=0){
+            tabPane.setTitleAt(index, title);
+        }
+        lblTitle.setText(title);
     }
 }

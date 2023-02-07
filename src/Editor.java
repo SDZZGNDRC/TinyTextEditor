@@ -8,7 +8,6 @@ public class Editor extends JFrame implements ActionListener  {
     private TextLineNumber textLineNumber;
     private JMenuBar menuBar;
     public  TabPage currentTabPage;
-    private File file;
     private final Font defaultFont_Text = new Font("微软雅黑", Font.PLAIN, 18);;
     private Font currentFont_Text;
     private String FontName_LineNumber = "Sitka Display";
@@ -130,10 +129,10 @@ public class Editor extends JFrame implements ActionListener  {
             if (currentTabPage.text_changed_flag){
                 SaveFile();
             }
-            file = dialog.getSelectedFile();
+            currentTabPage.file = dialog.getSelectedFile();
 
             NewTab();
-            currentTabPage.textPane.setText(readFile(file));
+            currentTabPage.textPane.setText(readFile(currentTabPage.file));
 		} catch (Exception e) {
 			e.printStackTrace();
 			JOptionPane.showMessageDialog(null, e, "Error", JOptionPane.ERROR_MESSAGE);
@@ -143,22 +142,20 @@ public class Editor extends JFrame implements ActionListener  {
         if(!currentTabPage.text_changed_flag){
             return;
         }
-        if(file == null){
+        if(currentTabPage.file == null){
             SaveAsFile();
         }else{
             String content = currentTabPage.textPane.getText();
-            try (PrintWriter writer = new PrintWriter(file);){
-                if (!file.canWrite())
-                    throw new Exception("Cannot write file!");
+            try (PrintWriter writer = new PrintWriter(currentTabPage.file);){
+                if (!currentTabPage.file.canWrite())
+                    throw new Exception("Cannot write currentTabPage.file!");
                 writer.write(content);
                 currentTabPage.text_changed_flag = false;
             } catch (Exception e) {
                 e.printStackTrace();
             }
+            currentTabPage.setTitle(currentTabPage.file.getName());
         }
-    }
-    private void CreateFile(){
-        NewTab();
     }
     private void SaveAsFile(){
         JFileChooser chooseFile = new JFileChooser(System.getProperty("user.home"));
@@ -167,20 +164,21 @@ public class Editor extends JFrame implements ActionListener  {
         if(result != JFileChooser.APPROVE_OPTION){
             return;
         }
-        file = chooseFile.getSelectedFile();
-		try (PrintWriter writer = new PrintWriter(file);){
+        currentTabPage.file = chooseFile.getSelectedFile();
+		try (PrintWriter writer = new PrintWriter(currentTabPage.file);){
 			writer.write(currentTabPage.textPane.getText());
 			currentTabPage.text_changed_flag = false;
-			setTitle("TinyTextEditor - " + file.getName());
+			setTitle("TinyTextEditor - " + currentTabPage.file.getName());
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
 		}
+        currentTabPage.setTitle(currentTabPage.file.getName());
     }
 
     // 从指定文件中读取所有内容
     private String readFile(File file) {
 		StringBuilder result = new StringBuilder();
-		try (	FileReader fr = new FileReader(file);		
+		try (	FileReader fr = new FileReader(currentTabPage.file);		
 				BufferedReader reader = new BufferedReader(fr);) {
 			String line;
 			while ((line = reader.readLine()) != null) {
@@ -188,7 +186,7 @@ public class Editor extends JFrame implements ActionListener  {
 			}
 		} catch (IOException e) {
 			e.printStackTrace();
-			JOptionPane.showMessageDialog(null, "Cannot read file !", "Error !", JOptionPane.ERROR_MESSAGE);
+			JOptionPane.showMessageDialog(null, "Cannot read currentTabPage.file !", "Error !", JOptionPane.ERROR_MESSAGE);
 		}
 		return result.toString();
 	}

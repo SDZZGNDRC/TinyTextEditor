@@ -4,29 +4,20 @@ import javax.swing.*;
 import java.awt.*;
 import java.io.*;
 
-public class Editor extends JFrame implements ActionListener, DocumentListener  {
-    public JEditorPane textPane;
+public class Editor extends JFrame implements ActionListener  {
+    private JTabbedPane tab;
     private TextLineNumber textLineNumber;
     private JMenuBar menuBar;
-    private boolean text_changed_flag;
+    public  TabPage currentTabPage;
     private File file;
-    private Font defaultFont_Text;
+    private final Font defaultFont_Text = new Font("微软雅黑", Font.PLAIN, 18);;
+    private Font currentFont_Text;
     private String FontName_LineNumber = "Sitka Display";
-    private Font defaultFont_LineNumber;
     public Editor(){
         super("TinyTextEditor");
-        defaultFont_Text = new Font("微软雅黑", Font.PLAIN, 18);
-        defaultFont_LineNumber = new Font(FontName_LineNumber, defaultFont_Text.getStyle(), defaultFont_Text.getSize());
-        textPane = new JEditorPane(); // 编辑区域
-        textPane.setFont(defaultFont_Text);
-        // textPane.setBorder(new EmptyBorder(0,0,0,0));// 消除边框
-        //textPane.setBorder(javax.swing.BorderFactory.createEmptyBorder());
-        JScrollPane jScrollPane = new JScrollPane(textPane);
-        textLineNumber = new TextLineNumber(textPane);
-        textLineNumber.setFont(defaultFont_LineNumber);
-        jScrollPane.setRowHeaderView(textLineNumber);
-        add(jScrollPane, BorderLayout.CENTER);
-        textPane.getDocument().addDocumentListener(this);
+        currentFont_Text = defaultFont_Text;
+        tab = new JTabbedPane();
+        add(tab, BorderLayout.CENTER);
 
         menuBar = new JMenuBar();
         setJMenuBar(menuBar);
@@ -85,9 +76,9 @@ public class Editor extends JFrame implements ActionListener, DocumentListener  
 		menu_settings.add(menuItem_SetFont);
 
         // Initial
-        text_changed_flag = false;
+        NewTab();
 
-        setSize(800, 600);
+        setSize(1000, 800);
         this.setLocationRelativeTo(this);
 		setVisible(true);
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -96,6 +87,7 @@ public class Editor extends JFrame implements ActionListener, DocumentListener  
     @Override
     public void actionPerformed(ActionEvent e){
         String action = e.getActionCommand();
+        Switch2CurrentTabPage();
         if(action.equals("退出")){
             System.exit(0);
         }else if(action.equals("打开")){
@@ -107,23 +99,23 @@ public class Editor extends JFrame implements ActionListener, DocumentListener  
         }else if(action.equals("保存为")){
             SaveAsFile();
         }else if(action.equals("剪切")){
-            textPane.cut();
+            currentTabPage.textPane.cut();
         }else if(action.equals("复制")){
-            textPane.copy();
+            currentTabPage.textPane.copy();
         }else if(action.equals("粘贴")){
-            textPane.paste();
+            currentTabPage.textPane.paste();
         }else if(action.equals("查找")){
             FindDialog find = new FindDialog(this, true);
 			find.showDialog();
         }else if(action.equals("全选")){
-            textPane.selectAll();
+            currentTabPage.textPane.selectAll();
         }else if(action.equals("更改字体")){
             JFontChooser fontChooser = new JFontChooser();
             int result = fontChooser.showDialog(this);
             if (result == JFontChooser.OK_OPTION)
             {
                Font font = fontChooser.getSelectedFont(); 
-               textPane.setFont(font);
+               currentTabPage.textPane.setFont(font);
                textLineNumber.setFont(new Font(FontName_LineNumber, font.getStyle(), font.getSize()));
             }
         }
@@ -136,44 +128,44 @@ public class Editor extends JFrame implements ActionListener, DocumentListener  
 			if (result != JFileChooser.APPROVE_OPTION){
 				return;
             }
-            if (text_changed_flag){
+            if (currentTabPage.text_changed_flag){
                 SaveFile();
             }
             file = dialog.getSelectedFile();
-            textPane.setText(readFile(file));
-            text_changed_flag = false;
-            setTitle("TinyTextEditor - " + file.getName());
+
+            NewTab();
+            currentTabPage.textPane.setText(readFile(file));
+            currentTabPage.text_changed_flag = false;
 		} catch (Exception e) {
 			e.printStackTrace();
 			JOptionPane.showMessageDialog(null, e, "Error", JOptionPane.ERROR_MESSAGE);
 		}
     }
     private void SaveFile(){
-        if(!text_changed_flag){
+        if(!currentTabPage.text_changed_flag){
             return;
         }
         if(file == null){
             SaveAsFile();
         }else{
-            String content = textPane.getText();
+            String content = currentTabPage.textPane.getText();
             try (PrintWriter writer = new PrintWriter(file);){
                 if (!file.canWrite())
                     throw new Exception("Cannot write file!");
                 writer.write(content);
-                text_changed_flag = false;
+                currentTabPage.text_changed_flag = false;
             } catch (Exception e) {
                 e.printStackTrace();
             }
         }
     }
     private void CreateFile(){
-        if(text_changed_flag){
+        if(currentTabPage.text_changed_flag){
             SaveFile();
         }
         file = null;
-        textPane.setText("");
-        text_changed_flag = false;
-        setTitle("TinyTextEditor");
+        currentTabPage.textPane.setText("");
+        currentTabPage.text_changed_flag = false;
     }
     private void SaveAsFile(){
         JFileChooser chooseFile = new JFileChooser(System.getProperty("user.home"));
@@ -184,26 +176,13 @@ public class Editor extends JFrame implements ActionListener, DocumentListener  
         }
         file = chooseFile.getSelectedFile();
 		try (PrintWriter writer = new PrintWriter(file);){
-			writer.write(textPane.getText());
-			text_changed_flag = false;
+			writer.write(currentTabPage.textPane.getText());
+			currentTabPage.text_changed_flag = false;
 			setTitle("TinyTextEditor - " + file.getName());
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
 		}
     }
-
-    @Override
-    public void insertUpdate(DocumentEvent e) {
-        text_changed_flag = true;
-    }
-    @Override
-    public void removeUpdate(DocumentEvent e) {
-        text_changed_flag = true;
-    }
-	@Override
-	public void changedUpdate(DocumentEvent e) {
-		text_changed_flag = true;
-	}
 
     // 从指定文件中读取所有内容
     private String readFile(File file) {
@@ -220,4 +199,28 @@ public class Editor extends JFrame implements ActionListener, DocumentListener  
 		}
 		return result.toString();
 	}
+    // Create a new tabbed page in tabPane
+    private void NewTab(){
+        TabPage tabPage = new TabPage(tab, GetNewTitle(), currentFont_Text, FontName_LineNumber);
+        tabPage.Select();
+        Switch2CurrentTabPage();
+    }
+    private void Switch2CurrentTabPage(){
+        currentTabPage = (TabPage)tab.getSelectedComponent();
+    }
+    private String GetNewTitle(){
+        int totalTabs = tab.getTabCount();
+        int index = 0;
+        String result = "新建";
+        for(int i = 0; i < totalTabs; i ++){
+            TabPage tabPage = (TabPage)tab.getTabComponentAt(i);
+            if(tabPage.lblTitle.getText().equals(result)){
+                index += 1;
+                result = "新建" + Integer.toString(index);
+            }else{
+                break;
+            }
+        }
+        return result;
+    }
 }

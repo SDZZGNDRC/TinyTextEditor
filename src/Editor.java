@@ -1,6 +1,8 @@
 import java.awt.event.*;
 import javax.swing.event.*;
 import javax.swing.*;
+import javax.swing.border.EmptyBorder;
+
 import java.awt.*;
 import java.io.*;
 
@@ -12,6 +14,8 @@ public class Editor extends JFrame implements ActionListener, DocumentListener  
     public Editor(){
         super("TinyTextEditor");
         textPane = new JEditorPane(); // 编辑区域
+        // textPane.setBorder(new EmptyBorder(0,0,0,0));// 消除边框
+        //textPane.setBorder(javax.swing.BorderFactory.createEmptyBorder());
         add(new JScrollPane(textPane), BorderLayout.CENTER);
         textPane.getDocument().addDocumentListener(this);
 
@@ -59,7 +63,8 @@ public class Editor extends JFrame implements ActionListener, DocumentListener  
         // Initial
         text_changed_flag = false;
 
-        setSize(500, 500);
+        setSize(800, 600);
+        this.setLocationRelativeTo(this);
 		setVisible(true);
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
     }

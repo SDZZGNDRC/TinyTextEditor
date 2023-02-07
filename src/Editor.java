@@ -35,14 +35,22 @@ public class Editor extends JFrame implements ActionListener, DocumentListener  
         JMenu menu_file = new JMenu("文件");
         menuBar.add(menu_file);
         JMenuItem menuItem_create = new JMenuItem("新建");
+        menuItem_create.addActionListener(this);
+		menuItem_create.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_N, InputEvent.CTRL_DOWN_MASK));
         menu_file.add(menuItem_create);
 		JMenuItem menuItem_open = new JMenuItem("打开");
+        menuItem_open.addActionListener(this);
+		menuItem_open.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_O, InputEvent.CTRL_DOWN_MASK));
         menu_file.add(menuItem_open);
 		JMenuItem menuItem_save = new JMenuItem("保存");
+        menuItem_save.addActionListener(this);
+		menuItem_save.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_S, InputEvent.CTRL_DOWN_MASK));
 		menu_file.add(menuItem_save);
 		JMenuItem menuItem_saveAs = new JMenuItem("保存为");
+        menuItem_saveAs.addActionListener(this);
         menu_file.add(menuItem_saveAs);
         JMenuItem menuItem_quit = new JMenuItem("退出");
+        menuItem_quit.addActionListener(this);
 		menu_file.add(menuItem_quit);
 
         // '编辑'菜单栏

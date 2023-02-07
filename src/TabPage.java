@@ -2,7 +2,6 @@ import java.awt.event.*;
 import javax.swing.event.*;
 import javax.swing.*;
 import java.awt.*;
-import java.io.*;
 
 public class TabPage extends JScrollPane implements ActionListener, DocumentListener {
     public JEditorPane textPane;
@@ -26,13 +25,15 @@ public class TabPage extends JScrollPane implements ActionListener, DocumentList
         // jScrollPane.setRowHeaderView(textLineNumber);
         // add(jScrollPane, BorderLayout.CENTER);
         textPane.getDocument().addDocumentListener(this);
+        textPane.setText("");
 
 
         tabPane.addTab(_title, this);
         lblTitle = new JLabel(_title);
+        lblTitle.setOpaque(false);
         btnClose = new JButton("x");
         btnClose.addActionListener(this);
-        // btnClose.setOpaque(false);
+        btnClose.setOpaque(false);
         pnlTab = new JPanel(new GridBagLayout());
         pnlTab.setOpaque(false);
 

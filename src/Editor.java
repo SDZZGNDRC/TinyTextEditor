@@ -1,5 +1,4 @@
 import java.awt.event.*;
-import javax.swing.event.*;
 import javax.swing.*;
 import java.awt.*;
 import java.io.*;
@@ -95,7 +94,7 @@ public class Editor extends JFrame implements ActionListener  {
         }else if(action.equals("保存")){
             SaveFile();
         }else if(action.equals("新建")){
-            CreateFile();
+            NewTab();
         }else if(action.equals("保存为")){
             SaveAsFile();
         }else if(action.equals("剪切")){
@@ -135,7 +134,6 @@ public class Editor extends JFrame implements ActionListener  {
 
             NewTab();
             currentTabPage.textPane.setText(readFile(file));
-            currentTabPage.text_changed_flag = false;
 		} catch (Exception e) {
 			e.printStackTrace();
 			JOptionPane.showMessageDialog(null, e, "Error", JOptionPane.ERROR_MESSAGE);
@@ -160,12 +158,7 @@ public class Editor extends JFrame implements ActionListener  {
         }
     }
     private void CreateFile(){
-        if(currentTabPage.text_changed_flag){
-            SaveFile();
-        }
-        file = null;
-        currentTabPage.textPane.setText("");
-        currentTabPage.text_changed_flag = false;
+        NewTab();
     }
     private void SaveAsFile(){
         JFileChooser chooseFile = new JFileChooser(System.getProperty("user.home"));
@@ -213,7 +206,7 @@ public class Editor extends JFrame implements ActionListener  {
         int index = 0;
         String result = "新建";
         for(int i = 0; i < totalTabs; i ++){
-            TabPage tabPage = (TabPage)tab.getTabComponentAt(i);
+            TabPage tabPage = (TabPage)tab.getComponentAt(i);
             if(tabPage.lblTitle.getText().equals(result)){
                 index += 1;
                 result = "新建" + Integer.toString(index);

@@ -121,6 +121,7 @@ public class Editor extends JFrame implements ActionListener  {
     private void OpenFile(){
         JFileChooser dialog = new JFileChooser(System.getProperty("user.home"));
 		dialog.setMultiSelectionEnabled(false);
+        File temp;
 		try {
 			int result = dialog.showOpenDialog(this);
 			if (result != JFileChooser.APPROVE_OPTION){
@@ -129,56 +130,59 @@ public class Editor extends JFrame implements ActionListener  {
             if (currentTabPage.text_changed_flag){
                 SaveFile();
             }
-            currentTabPage.file = dialog.getSelectedFile();
-
+            temp = dialog.getSelectedFile();
+            // currentTabPage.setFile(temp);
+            currentTabPage.file_absolutePath = temp.getAbsolutePath();
             NewTab();
-            currentTabPage.textPane.setText(readFile(currentTabPage.file));
+            currentTabPage.textPane.setText(readFile(temp));
+            currentTabPage.setTitle(temp.getName());
 		} catch (Exception e) {
 			e.printStackTrace();
 			JOptionPane.showMessageDialog(null, e, "Error", JOptionPane.ERROR_MESSAGE);
 		}
     }
     private void SaveFile(){
+        File file = new File(currentTabPage.file_absolutePath);
         if(!currentTabPage.text_changed_flag){
             return;
         }
-        if(currentTabPage.file == null){
+        if(currentTabPage.file_absolutePath == null){
             SaveAsFile();
         }else{
             String content = currentTabPage.textPane.getText();
-            try (PrintWriter writer = new PrintWriter(currentTabPage.file);){
-                if (!currentTabPage.file.canWrite())
+            try (PrintWriter writer = new PrintWriter(file);){
+                if (!file.canWrite())
                     throw new Exception("Cannot write currentTabPage.file!");
                 writer.write(content);
                 currentTabPage.text_changed_flag = false;
             } catch (Exception e) {
                 e.printStackTrace();
             }
-            currentTabPage.setTitle(currentTabPage.file.getName());
+            currentTabPage.setTitle(file.getName());
         }
     }
     private void SaveAsFile(){
+        File file;
         JFileChooser chooseFile = new JFileChooser(System.getProperty("user.home"));
         chooseFile.setDialogTitle("保存为");
         int result = chooseFile.showSaveDialog(this);
         if(result != JFileChooser.APPROVE_OPTION){
             return;
         }
-        currentTabPage.file = chooseFile.getSelectedFile();
-		try (PrintWriter writer = new PrintWriter(currentTabPage.file);){
+        file = chooseFile.getSelectedFile();
+		try (PrintWriter writer = new PrintWriter(file);){
 			writer.write(currentTabPage.textPane.getText());
 			currentTabPage.text_changed_flag = false;
-			setTitle("TinyTextEditor - " + currentTabPage.file.getName());
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
 		}
-        currentTabPage.setTitle(currentTabPage.file.getName());
+        currentTabPage.setTitle(file.getName());
     }
 
     // 从指定文件中读取所有内容
     private String readFile(File file) {
 		StringBuilder result = new StringBuilder();
-		try (	FileReader fr = new FileReader(currentTabPage.file);		
+		try (	FileReader fr = new FileReader(file);		
 				BufferedReader reader = new BufferedReader(fr);) {
 			String line;
 			while ((line = reader.readLine()) != null) {

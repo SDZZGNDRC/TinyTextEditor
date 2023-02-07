@@ -12,21 +12,18 @@ public class TabPage extends JScrollPane implements ActionListener, DocumentList
     public JLabel lblTitle; // Title
     private JButton btnClose; // Close button
     public boolean text_changed_flag;
-    public File file;
+    public String file_absolutePath;
     public TabPage(JTabbedPane _tabPane, String _title, Font _font, String _FontName_LineNumber) {
         super();
         text_changed_flag = false;
-        file = null;
+        file_absolutePath = "";
         tabPane = _tabPane;
         textPane = new JEditorPane(); // 编辑区域
         this.setViewportView(textPane);
         textPane.setFont(_font);
-        // JScrollPane jScrollPane = new JScrollPane(textPane);
         textLineNumber = new TextLineNumber(textPane);
         textLineNumber.setFont(new Font(_FontName_LineNumber, _font.getStyle(), _font.getSize()));
         this.setRowHeaderView(textLineNumber);
-        // jScrollPane.setRowHeaderView(textLineNumber);
-        // add(jScrollPane, BorderLayout.CENTER);
         textPane.getDocument().addDocumentListener(this);
         textPane.setText("");
 
@@ -34,6 +31,7 @@ public class TabPage extends JScrollPane implements ActionListener, DocumentList
         tabPane.addTab(_title, this);
         lblTitle = new JLabel(_title);
         lblTitle.setOpaque(false);
+        lblTitle.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 5));
         btnClose = new JButton("x");
         btnClose.addActionListener(this);
         btnClose.setOpaque(false);
@@ -57,6 +55,9 @@ public class TabPage extends JScrollPane implements ActionListener, DocumentList
     public void actionPerformed(ActionEvent e){
         String action = e.getActionCommand();
         if(action.equals("x")){
+            if(tabPane.getTabCount()==1){
+                return;
+            }
             close();
             JButton source = (JButton)(e.getSource());
             source.removeActionListener(this);

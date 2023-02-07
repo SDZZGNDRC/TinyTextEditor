@@ -1,22 +1,31 @@
 import java.awt.event.*;
 import javax.swing.event.*;
 import javax.swing.*;
-import javax.swing.border.EmptyBorder;
-
 import java.awt.*;
 import java.io.*;
 
 public class Editor extends JFrame implements ActionListener, DocumentListener  {
     public JEditorPane textPane;
+    private TextLineNumber textLineNumber;
     private JMenuBar menuBar;
     private boolean text_changed_flag;
     private File file;
+    private Font defaultFont_Text;
+    private String FontName_LineNumber = "Sitka Display";
+    private Font defaultFont_LineNumber;
     public Editor(){
         super("TinyTextEditor");
+        defaultFont_Text = new Font("微软雅黑", Font.PLAIN, 18);
+        defaultFont_LineNumber = new Font(FontName_LineNumber, defaultFont_Text.getStyle(), defaultFont_Text.getSize());
         textPane = new JEditorPane(); // 编辑区域
+        textPane.setFont(defaultFont_Text);
         // textPane.setBorder(new EmptyBorder(0,0,0,0));// 消除边框
         //textPane.setBorder(javax.swing.BorderFactory.createEmptyBorder());
-        add(new JScrollPane(textPane), BorderLayout.CENTER);
+        JScrollPane jScrollPane = new JScrollPane(textPane);
+        textLineNumber = new TextLineNumber(textPane);
+        textLineNumber.setFont(defaultFont_LineNumber);
+        jScrollPane.setRowHeaderView(textLineNumber);
+        add(jScrollPane, BorderLayout.CENTER);
         textPane.getDocument().addDocumentListener(this);
 
         menuBar = new JMenuBar();
@@ -60,6 +69,13 @@ public class Editor extends JFrame implements ActionListener, DocumentListener  
 		menuItem_selectAll.addActionListener(this);
 		menu_edit.add(menuItem_selectAll);
 
+        // '设置'菜单栏
+        JMenu menu_settings = new JMenu("设置");
+        menuBar.add(menu_settings);
+		JMenuItem menuItem_SetFont = new JMenuItem("更改字体");
+		menuItem_SetFont.addActionListener(this);
+		menu_settings.add(menuItem_SetFont);
+
         // Initial
         text_changed_flag = false;
 
@@ -93,6 +109,15 @@ public class Editor extends JFrame implements ActionListener, DocumentListener  
 			find.showDialog();
         }else if(action.equals("全选")){
             textPane.selectAll();
+        }else if(action.equals("更改字体")){
+            JFontChooser fontChooser = new JFontChooser();
+            int result = fontChooser.showDialog(this);
+            if (result == JFontChooser.OK_OPTION)
+            {
+               Font font = fontChooser.getSelectedFont(); 
+               textPane.setFont(font);
+               textLineNumber.setFont(new Font(FontName_LineNumber, font.getStyle(), font.getSize()));
+            }
         }
     }
     private void OpenFile(){

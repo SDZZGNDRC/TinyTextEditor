@@ -2,7 +2,6 @@ import java.awt.event.*;
 import javax.swing.event.*;
 import javax.swing.*;
 import java.awt.*;
-import java.io.*;
 
 public class TabPage extends JScrollPane implements ActionListener, DocumentListener {
     public JEditorPane textPane;

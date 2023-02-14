@@ -2,6 +2,8 @@ import java.awt.event.*;
 import javax.swing.*;
 import java.awt.*;
 import java.io.*;
+import javax.swing.plaf.ColorUIResource;
+import com.formdev.flatlaf.intellijthemes.*;
 
 public class Editor extends JFrame implements ActionListener  {
     private JTabbedPane tab;
@@ -11,6 +13,20 @@ public class Editor extends JFrame implements ActionListener  {
     private final Font defaultFont_Text = new Font("微软雅黑", Font.PLAIN, 18);;
     private Font currentFont_Text;
     private String FontName_LineNumber = "Sitka Display";
+    private JFontChooser fontChooser = new JFontChooser();
+    private String Current_Theme = "FlatSolarizedLightIJTheme";
+    String[] Theme_choices = {
+        "FlatArcDarkIJTheme",
+        "FlatArcDarkOrangeIJTheme",
+        "FlatCyanLightIJTheme",
+        "FlatDarkPurpleIJTheme",
+        "FlatGradiantoDeepOceanIJTheme",
+        "FlatHighContrastIJTheme",
+        "FlatOneDarkIJTheme",
+        "FlatSolarizedLightIJTheme",
+        "FlatMonokaiProIJTheme",
+        "FlatGruvboxDarkSoftIJTheme",
+    };
     public Editor(){
         super("TinyTextEditor");
         currentFont_Text = defaultFont_Text;
@@ -72,9 +88,13 @@ public class Editor extends JFrame implements ActionListener  {
 		JMenuItem menuItem_SetFont = new JMenuItem("更改字体");
 		menuItem_SetFont.addActionListener(this);
 		menu_settings.add(menuItem_SetFont);
+		JMenuItem menuItem_SetTheme = new JMenuItem("更改主题");
+		menuItem_SetTheme.addActionListener(this);
+		menu_settings.add(menuItem_SetTheme);
 
         // Initial
         NewTab();
+        setTheme(Current_Theme);
 
         setSize(1000, 800);
         this.setLocationRelativeTo(this);
@@ -108,7 +128,6 @@ public class Editor extends JFrame implements ActionListener  {
         }else if(action.equals("全选")){
             currentTabPage.textPane.selectAll();
         }else if(action.equals("更改字体")){
-            JFontChooser fontChooser = new JFontChooser();
             int result = fontChooser.showDialog(this);
             if (result == JFontChooser.OK_OPTION)
             {
@@ -116,6 +135,14 @@ public class Editor extends JFrame implements ActionListener  {
                currentTabPage.textPane.setFont(font);
                textLineNumber.setFont(new Font(FontName_LineNumber, font.getStyle(), font.getSize()));
             }
+        }else if(action.equals("更改主题")){
+            String input = (String) JOptionPane.showInputDialog(
+                null, "Choose now...",
+        "The Choice of a Lifetime", JOptionPane.QUESTION_MESSAGE, null, // Use
+                Theme_choices, // Array of choices
+                Current_Theme); // Initial choice
+            setTheme(input);
+            Current_Theme = input;
         }
     }
     private void OpenFile(){
@@ -146,7 +173,7 @@ public class Editor extends JFrame implements ActionListener  {
         if(!currentTabPage.text_changed_flag){
             return;
         }
-        if(currentTabPage.file_absolutePath == null){
+        if(currentTabPage.file_absolutePath == ""){
             SaveAsFile();
         }else{
             String content = currentTabPage.textPane.getText();
@@ -217,5 +244,49 @@ public class Editor extends JFrame implements ActionListener  {
             }
         }
         return result;
+    }
+    public void setTheme(String themeName){
+        UIDefaults defaults = UIManager.getLookAndFeelDefaults();
+        defaults.put("TextPane.focus", new ColorUIResource(new Color(0, 0, 0, 0)));
+        try {
+            switch (themeName) {
+                case "FlatArcDarkIJTheme":
+                    UIManager.setLookAndFeel( new FlatArcDarkIJTheme() );
+                    break;
+                case "FlatArcDarkOrangeIJTheme":
+                    UIManager.setLookAndFeel( new FlatArcDarkOrangeIJTheme() );
+                    break;
+                case "FlatCyanLightIJTheme":
+                    UIManager.setLookAndFeel( new FlatCyanLightIJTheme() );
+                    break;
+                case "FlatDarkPurpleIJTheme":
+                    UIManager.setLookAndFeel( new FlatDarkPurpleIJTheme() );
+                    break;
+                case "FlatGradiantoDeepOceanIJTheme":
+                    UIManager.setLookAndFeel( new FlatGradiantoDeepOceanIJTheme() );
+                    break;
+                case "FlatHighContrastIJTheme":
+                    UIManager.setLookAndFeel( new FlatHighContrastIJTheme() );
+                    break;
+                case "FlatOneDarkIJTheme":
+                    UIManager.setLookAndFeel( new FlatOneDarkIJTheme() );
+                    break;
+                case "FlatSolarizedLightIJTheme":
+                    UIManager.setLookAndFeel( new FlatSolarizedLightIJTheme() );
+                    break;
+                case "FlatMonokaiProIJTheme":
+                    UIManager.setLookAndFeel( new FlatMonokaiProIJTheme() );
+                    break;
+                case "FlatGruvboxDarkSoftIJTheme":
+                    UIManager.setLookAndFeel( new FlatGruvboxDarkSoftIJTheme() );
+                    break;
+                
+                default:
+                    break;
+            }
+        } catch( Exception ex ) {
+            System.err.println( "Failed to initialize LaF" );
+        }
+        SwingUtilities.updateComponentTreeUI(this);
     }
 }
